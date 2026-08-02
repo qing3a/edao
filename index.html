@@ -3,160 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="盗临天下——从叙事的角度，暴露恶、显现恶，让恶为人所知。拆解介入方挑拨关系、制造对立、恶意归因、从中渔利的叙事手法。">
-    <title>盗临天下 · 让恶盗的手法无处藏身</title>
+    <meta name="description" content="盗临天下——叙事定义你的应得。当应得与不甘聚集，贪嗔与需求应运而生：战斗，你是别人的枪；储备，你是别人的收益。这就是盗临天下。">
+    <title>盗临天下 · 叙事，定义你的应得</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --ink: #0b0a10;
+            --paper: #ece3d0;
+            --paper-dim: #9c927c;
+            --cinnabar: #b3402f;
+            --cinnabar-deep: #8f2d24;
+            --gold: #c9a45c;
+            --line: rgba(201, 164, 92, 0.20);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { min-height: 100%; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
-            background: #0d0b11;
-            color: #d8cdb4;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(179, 64, 47, 0.09), transparent 44%),
+                radial-gradient(ellipse at 85% 100%, rgba(201, 164, 92, 0.07), transparent 46%),
+                var(--ink);
+            color: var(--paper);
+            line-height: 1.9;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        .rise { animation: rise .9s cubic-bezier(.2,.7,.2,1) both; }
+
+        /* ===== 开屏 · 宣言 ===== */
+        .hero {
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 64px 24px;
-        }
-
-        .main {
-            width: 100%;
-            max-width: 560px;
             text-align: center;
+            padding: 72px 24px;
+            position: relative;
         }
-
-        /* 标题 */
         .title {
-            font-family: 'Ma Shan Zheng', 'KaiTi', 'STKaiti', serif;
-            font-weight: 400;
-            font-size: clamp(52px, 9vw, 84px);
-            letter-spacing: 0.18em;
-            text-indent: 0.18em;
-            color: #f0e7d3;
-            line-height: 1.2;
-        }
-
-        /* 细分隔线 */
-        .divider {
-            width: 56px;
-            height: 1px;
-            margin: 30px auto 30px;
-            background: linear-gradient(90deg, transparent, #c8a45c, transparent);
-        }
-
-        /* 引言 */
-        .intro {
-            font-size: 15.5px;
-            line-height: 2.2;
-            letter-spacing: 0.08em;
-            color: #b3a88f;
-        }
-        .intro .red { color: #d97a5f; }
-
-        /* 五术 · 克制列表 */
-        .list {
-            list-style: none;
-            margin: 48px 0 8px;
-        }
-        .list li {
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-            gap: 14px;
-            padding: 9px 0;
-        }
-        .list .num {
             font-family: 'Ma Shan Zheng', 'KaiTi', serif;
-            font-size: 19px;
-            color: #b03a2e;
-            flex: none;
+            font-weight: 400;
+            font-size: clamp(60px, 12vw, 116px);
+            letter-spacing: 0.2em;
+            text-indent: 0.2em;
+            color: #f2e9d8;
+            text-shadow: 0 0 70px rgba(201, 164, 92, 0.18);
+            margin-bottom: 40px;
         }
-        .list .name {
-            font-size: 16px;
-            letter-spacing: 0.14em;
-            color: #e0d6bd;
+        .manifesto { max-width: 660px; }
+        .manifesto .line {
+            font-size: clamp(15px, 2.2vw, 18px);
+            color: #cfc4aa;
+            letter-spacing: 0.08em;
         }
-        .list .hint {
-            font-size: 11px;
-            letter-spacing: 0.04em;
-            color: #7d7260;
-            margin-top: 3px;
-            display: block;
-        }
-
-        /* 结语 */
-        .closing {
-            margin: 44px 0 40px;
-            font-size: 14px;
-            line-height: 2.1;
-            letter-spacing: 0.05em;
-            color: #b3a88f;
-        }
-        .closing .strong {
-            color: #d97a5f;
-            font-size: 15px;
-            font-weight: 600;
+        .manifesto .line strong { color: #f0e7d3; font-weight: 700; }
+        .manifesto .line + .line { margin-top: 10px; }
+        .manifesto .punch {
+            margin-top: 26px;
+            font-size: clamp(17px, 2.6vw, 21px);
+            font-weight: 700;
+            color: #e09176;
+            letter-spacing: 0.12em;
         }
 
-        /* 入场按钮 */
+        .divider {
+            width: 1px; height: 44px;
+            background: linear-gradient(180deg, transparent, var(--gold), transparent);
+            margin: 38px 0;
+        }
+
         .cta {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-family: 'Noto Serif SC', serif;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.24em;
-            text-indent: 0.24em;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-indent: 0.2em;
             color: #f2e9d8;
             text-decoration: none;
-            background: linear-gradient(180deg, #a93a2e, #8f2d24);
-            border-radius: 4px;
-            padding: 14px 40px;
-            transition: 0.25s;
+            background: linear-gradient(180deg, var(--cinnabar), var(--cinnabar-deep));
+            border: 1px solid rgba(242, 233, 216, 0.3);
+            padding: 16px 46px;
+            border-radius: 6px;
+            box-shadow: 0 10px 40px rgba(143, 45, 36, 0.4);
+            transition: transform .25s, filter .25s, box-shadow .25s;
         }
-        .cta:hover {
-            background: linear-gradient(180deg, #bc4436, #9c332a);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 26px rgba(143, 45, 36, 0.35);
-        }
-        .cta .arrow { font-size: 16px; letter-spacing: 0; }
+        .cta:hover { transform: translateY(-3px); filter: brightness(1.08); box-shadow: 0 14px 50px rgba(179, 64, 47, 0.5); }
+        .cta .arr { letter-spacing: 0; }
 
-        .foot {
-            margin-top: 44px;
-            font-size: 11px;
-            letter-spacing: 0.16em;
-            color: #5f5648;
+        .scroll-hint {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            font-size: 12px; letter-spacing: 0.3em; color: var(--paper-dim);
         }
+        .scroll-hint::after {
+            content: ''; display: block; width: 1px; height: 32px; margin: 10px auto 0;
+            background: linear-gradient(180deg, var(--gold), transparent);
+            animation: drop 2.2s ease-in-out infinite;
+        }
+        @keyframes drop { 0%,100% { opacity: .25; transform: translateY(0); } 50% { opacity: .9; transform: translateY(6px); } }
+
+        /* ===== 五术 · 证据 ===== */
+        section.tricks { padding: 96px 0 64px; }
+        .sec-head { text-align: center; margin-bottom: 52px; }
+        .sec-index {
+            display: inline-block;
+            font-size: 12px; letter-spacing: 0.5em; text-indent: 0.5em;
+            color: var(--gold);
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            padding: 5px 20px;
+            margin-bottom: 20px;
+        }
+        .sec-head h2 {
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-weight: 400;
+            font-size: clamp(30px, 4.5vw, 42px);
+            letter-spacing: 0.22em;
+            text-indent: 0.22em;
+            color: #f0e7d3;
+        }
+        .sec-head p { margin-top: 12px; font-size: 14px; color: var(--paper-dim); letter-spacing: 0.1em; }
+
+        .trick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 16px;
+        }
+        .trick {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 30px 22px 26px;
+            transition: transform .25s, border-color .25s, background .25s;
+        }
+        .trick:hover {
+            transform: translateY(-4px);
+            border-color: rgba(201, 164, 92, 0.55);
+            background: rgba(201, 164, 92, 0.05);
+        }
+        .trick .num {
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-size: 26px; color: var(--cinnabar);
+            line-height: 1;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .trick .name {
+            display: block;
+            font-size: 16px; font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #ece2cb;
+            margin-bottom: 8px;
+        }
+        .trick .desc {
+            display: block;
+            font-size: 12.5px;
+            line-height: 1.85;
+            color: var(--paper-dim);
+        }
+
+        /* ===== 结语 ===== */
+        .closing { padding: 112px 24px 120px; text-align: center; }
+        .closing .big {
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-weight: 400;
+            font-size: clamp(30px, 5.5vw, 50px);
+            letter-spacing: 0.16em;
+            text-indent: 0.16em;
+            color: #f0e7d3;
+            margin-bottom: 18px;
+        }
+        .closing .big em { font-style: normal; color: #e09176; }
+        .closing p { color: var(--paper-dim); font-size: 14px; letter-spacing: 0.12em; margin-bottom: 44px; }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 34px 24px 44px;
+            text-align: center;
+            font-size: 12px;
+            letter-spacing: 0.16em;
+            color: #6d6352;
+        }
+        footer b { color: var(--paper-dim); font-weight: 400; }
 
         @media (max-width: 640px) {
-            body { padding: 48px 20px; }
-            .list li { gap: 10px; }
+            .hero { padding: 56px 20px; }
+            .scroll-hint { display: none; }
+            section.tricks { padding: 72px 0 40px; }
+            .closing { padding: 84px 20px 96px; }
+            .trick-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .trick { padding: 22px 16px 20px; }
         }
     </style>
 </head>
 <body>
-    <main class="main">
-        <h1 class="title">盗临天下</h1>
-        <div class="divider"></div>
-        <p class="intro">从叙事的角度，暴露恶、显现恶，<span class="red">让恶为人所知</span>。</p>
+    <!-- 开屏 · 宣言 -->
+    <header class="hero">
+        <h1 class="title rise">盗临天下</h1>
+        <div class="manifesto">
+            <p class="line rise" style="animation-delay:.14s">叙事，定义你的背景、身份、因果与<strong>应得</strong>。</p>
+            <p class="line rise" style="animation-delay:.26s">当应得与不甘聚集，<strong>贪嗔与需求</strong>应运而生。</p>
+            <p class="punch rise" style="animation-delay:.4s">战斗，你是别人的枪；储备，你是别人的收益。</p>
+        </div>
+        <div class="divider rise" style="animation-delay:.5s"></div>
+        <a class="cta rise" style="animation-delay:.58s" href="象限文案生成器 .html">进入矩阵选题引擎<span class="arr">→</span></a>
+        <div class="scroll-hint">下 卷</div>
+    </header>
 
-        <ul class="list">
-            <li><span class="num">壹</span><span class="name">情绪按钮<span class="hint">贪、嗔、痴</span></span></li>
-            <li><span class="num">贰</span><span class="name">对立制造<span class="hint">敌化隔离</span></span></li>
-            <li><span class="num">叁</span><span class="name">恶意归因<span class="hint">锁定罪人</span></span></li>
-            <li><span class="num">肆</span><span class="name">留白漏斗<span class="hint">扣住答案</span></span></li>
-            <li><span class="num">伍</span><span class="name">审核规避<span class="hint">概念替换</span></span></li>
-        </ul>
+    <!-- 五术 · 证据 -->
+    <section class="tricks">
+        <div class="wrap">
+            <div class="sec-head">
+                <span class="sec-index">证据 · 其一</span>
+                <h2>恶盗五术</h2>
+                <p>所行手法，皆见于此</p>
+            </div>
+            <div class="trick-grid">
+                <div class="trick">
+                    <span class="num">壹</span>
+                    <span class="name">情绪按钮</span>
+                    <span class="desc">贪、嗔、痴三引擎，按下读者的欲望、愤怒与幻想</span>
+                </div>
+                <div class="trick">
+                    <span class="num">贰</span>
+                    <span class="name">对立制造</span>
+                    <span class="desc">把人从「人」的名单里除名，再谈恩怨</span>
+                </div>
+                <div class="trick">
+                    <span class="num">叁</span>
+                    <span class="name">恶意归因</span>
+                    <span class="desc">复杂因果，简化为一句「他有病」</span>
+                </div>
+                <div class="trick">
+                    <span class="num">肆</span>
+                    <span class="name">留白漏斗</span>
+                    <span class="desc">答案就在眼前，偏要读者先付钱</span>
+                </div>
+                <div class="trick">
+                    <span class="num">伍</span>
+                    <span class="name">审核规避</span>
+                    <span class="desc">换一个词，越界内容便悄然过关</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <p class="closing">手法一旦被完整写出并公开，就再也藏不住。<br><span class="strong">认得出来，就不再是猎物。</span></p>
+    <!-- 结语 -->
+    <section class="closing">
+        <div class="big">手法被写下，就再也藏不住。<br><em>认得出来，就不再是猎物。</em></div>
+        <p>从叙事的角度，暴露恶、显现恶，让恶为人所知。</p>
+        <a class="cta" href="象限文案生成器 .html">进入矩阵选题引擎<span class="arr">→</span></a>
+    </section>
 
-        <a class="cta" href="象限文案生成器 .html">进入矩阵选题引擎<span class="arrow">→</span></a>
-
-        <div class="foot">纯前端 · 无构建 · 数据与逻辑完全开源</div>
-    </main>
+    <footer>
+        <p><b>纯前端</b> · <b>无构建</b> · 数据与逻辑完全开源</p>
+    </footer>
 </body>
 </html>
