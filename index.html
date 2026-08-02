@@ -3,152 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="恶盗临天——从叙事的角度，暴露恶、显现恶，让恶为人所知。拆解介入方挑拨关系、制造对立、恶意归因、从中渔利的叙事手法。">
     <title>恶盗临天 · 让恶盗的手法无处藏身</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { min-height: 100%; }
         body {
-            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            background:
+                radial-gradient(ellipse at 12% 8%, rgba(176, 58, 46, 0.10), transparent 52%),
+                radial-gradient(ellipse at 88% 92%, rgba(200, 164, 92, 0.09), transparent 52%),
+                repeating-linear-gradient(0deg, rgba(232, 221, 200, 0.012) 0 1px, transparent 1px 3px),
+                #0e0c12;
+            color: #e6ddc8;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 48px 24px;
-            background-image:
-                radial-gradient(ellipse at 20% 0%, rgba(139,92,246,0.18) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 100%, rgba(245,158,11,0.12) 0%, transparent 50%);
+            padding: 56px 24px;
+            position: relative;
+            overflow-x: hidden;
         }
-        .hero {
-            max-width: 760px;
+        /* 背景竖排水印 */
+        body::before {
+            content: '恶 盗 临 天';
+            position: fixed;
+            right: -2vw;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-size: 22vw;
+            letter-spacing: 0.2em;
+            color: rgba(200, 164, 92, 0.045);
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+
+        .paper {
+            position: relative;
+            z-index: 1;
             width: 100%;
+            max-width: 720px;
             text-align: center;
+            padding: 56px 48px 44px;
+            border: 1px solid rgba(200, 164, 92, 0.42);
+            outline: 1px solid rgba(200, 164, 92, 0.18);
+            outline-offset: 7px;
+            background: rgba(20, 17, 24, 0.55);
+            backdrop-filter: blur(2px);
         }
+        /* 四角回纹装饰 */
+        .paper .corner { position: absolute; width: 22px; height: 22px; border-color: rgba(200, 164, 92, 0.55); border-style: solid; }
+        .paper .corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .paper .corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+        .paper .corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .paper .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        /* 朱砂印章 */
         .seal {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(139,92,246,0.15);
-            border: 1px solid rgba(139,92,246,0.4);
-            color: #c4b5fd;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            padding: 6px 18px;
-            border-radius: 30px;
-            margin-bottom: 28px;
+            display: inline-grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            width: 88px;
+            height: 88px;
+            background: #b03a2e;
+            border-radius: 10px;
+            transform: rotate(-3deg);
+            box-shadow: 0 4px 24px rgba(176, 58, 46, 0.35), inset 0 0 0 3px rgba(230, 221, 200, 0.22);
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            color: #f2e9d8;
+            font-size: 26px;
+            line-height: 1;
+            margin-bottom: 34px;
         }
-        h1 {
-            font-size: 56px;
-            font-weight: 800;
-            letter-spacing: 6px;
-            background: linear-gradient(120deg, #fff 20%, #a78bfa 60%, #f59e0b 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 16px;
+        .seal span { display: flex; align-items: center; justify-content: center; }
+
+        .title {
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-size: clamp(46px, 8vw, 74px);
+            font-weight: 400;
+            letter-spacing: 0.16em;
+            text-indent: 0.16em;
+            color: #f0e7d3;
+            text-shadow: 0 0 40px rgba(200, 164, 92, 0.18);
+            margin-bottom: 10px;
         }
-        .subtitle {
-            font-size: 16px;
-            color: #94a3b8;
-            margin-bottom: 44px;
-            line-height: 1.7;
+
+        /* 鎏金菱纹分隔 */
+        .divider {
+            height: 9px;
+            margin: 22px auto 26px;
+            max-width: 420px;
+            background:
+                repeating-linear-gradient(90deg,
+                    transparent 0 10px,
+                    rgba(200, 164, 92, 0.75) 10px 14px,
+                    transparent 14px 22px,
+                    rgba(200, 164, 92, 0.28) 22px 24px,
+                    transparent 24px 34px);
+            opacity: 0.8;
         }
-        .intent {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 32px 36px;
+
+        .intro {
+            font-size: 15.5px;
+            line-height: 2.1;
+            color: #d8cdb4;
+            letter-spacing: 0.06em;
+        }
+        .intro .red { color: #d97a5f; font-weight: 600; }
+
+        /* 罪状录 */
+        .crimes-title {
+            margin: 44px 0 6px;
+            font-size: 13.5px;
+            letter-spacing: 0.6em;
+            text-indent: 0.6em;
+            color: #c8a45c;
+            font-weight: 700;
+        }
+        .crimes-sub {
+            font-size: 11.5px;
+            color: #8a7f68;
+            letter-spacing: 0.18em;
+            margin-bottom: 22px;
+        }
+        .crimes {
+            list-style: none;
             text-align: left;
-            margin-bottom: 20px;
+            border-top: 1px solid rgba(200, 164, 92, 0.22);
         }
-        .intent h2 {
+        .crimes li {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 15px 6px;
+            border-bottom: 1px solid rgba(200, 164, 92, 0.16);
+        }
+        .crimes .num {
+            flex: none;
+            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
+            font-size: 22px;
+            color: #b03a2e;
+            line-height: 1.15;
+            width: 34px;
+            text-align: center;
+            padding-top: 1px;
+        }
+        .crimes .crime-name {
+            display: block;
             font-size: 15px;
             font-weight: 700;
-            color: #a78bfa;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
+            color: #ece2cb;
+            letter-spacing: 0.12em;
+            margin-bottom: 3px;
         }
-        .intent p {
-            font-size: 14px;
+        .crimes .crime-name i { font-style: normal; color: #c8a45c; font-weight: 400; margin: 0 4px; }
+        .crimes .crime-desc {
+            display: block;
+            font-size: 12.5px;
+            color: #9a8f7a;
+            line-height: 1.8;
+            letter-spacing: 0.03em;
+        }
+
+        /* 结语 */
+        .closing {
+            margin: 34px auto 30px;
+            max-width: 480px;
+            font-size: 14.5px;
             line-height: 2;
-            color: #cbd5e1;
-            margin-bottom: 14px;
+            color: #d8cdb4;
         }
-        .intent .key {
-            color: #fbbf24;
-            font-weight: 600;
+        .closing .strong {
+            color: #d97a5f;
+            font-weight: 700;
+            font-size: 15.5px;
         }
-        .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
-        .chip {
-            background: rgba(139,92,246,0.12);
-            border: 1px solid rgba(139,92,246,0.3);
-            color: #c4b5fd;
-            font-size: 12px;
-            font-weight: 500;
-            padding: 5px 14px;
-            border-radius: 30px;
-        }
-        .entry {
+
+        /* 入场令 · 按钮 */
+        .cta {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: #8b5cf6;
-            color: #fff;
+            font-family: 'Noto Serif SC', serif;
             font-size: 16px;
             font-weight: 700;
+            letter-spacing: 0.22em;
+            text-indent: 0.22em;
+            color: #f2e9d8;
             text-decoration: none;
-            padding: 16px 44px;
-            border-radius: 40px;
-            margin-top: 12px;
-            transition: 0.2s;
-            box-shadow: 0 8px 30px rgba(139,92,246,0.35);
+            background: linear-gradient(180deg, #a93a2e, #8f2d24);
+            border: 1px solid rgba(230, 221, 200, 0.4);
+            box-shadow: 0 6px 26px rgba(143, 45, 36, 0.4), inset 0 0 0 3px rgba(176, 58, 46, 0.55);
+            padding: 15px 42px;
+            border-radius: 4px;
+            transition: 0.25s;
         }
-        .entry:hover { background: #7c3aed; transform: translateY(-2px); }
+        .cta:hover {
+            background: linear-gradient(180deg, #bc4436, #9c332a);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 34px rgba(176, 58, 46, 0.5);
+        }
+        .cta .arrow { font-family: serif; font-size: 18px; letter-spacing: 0; }
+
         .foot {
-            margin-top: 40px;
-            font-size: 12px;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-top: 34px;
+            font-size: 11.5px;
+            letter-spacing: 0.14em;
+            color: #6d6352;
         }
+        .foot b { color: #9a8f7a; font-weight: 400; }
+
         @media (max-width: 640px) {
-            h1 { font-size: 38px; letter-spacing: 4px; }
-            .intent { padding: 24px 20px; }
+            body { padding: 32px 14px; }
+            .paper { padding: 40px 20px 34px; }
+            .seal { width: 68px; height: 68px; font-size: 20px; margin-bottom: 26px; }
+            .title { letter-spacing: 0.1em; text-indent: 0.1em; }
+            .crimes li { gap: 12px; }
+            body::before { font-size: 34vw; right: -6vw; }
         }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <div class="seal">⚖ 叙事显影 · 恶盗现形</div>
-        <h1>恶盗临天</h1>
-        <p class="subtitle">从叙事的角度，暴露恶、显现恶，让恶为人所知。</p>
+    <div class="paper">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
 
-        <div class="intent">
-            <h2>初衷</h2>
-            <p>这里的「恶」，不是亲密关系里甲乙双方的矛盾——受害者与施害者之间的恩怨只是表象。真正的恶，是<span class="key">介入方</span>：趁关系出现裂痕时介入，挑拨关系、制造对立、恶意归因，把复杂的痛苦压缩成一句「他有病、你是受害者」的单一剧本，再从中渔利。这些人，就是<span class="key">恶盗</span>。</p>
-            <p>本工具把恶盗的整套叙事手法公开、原样、完整地摊开：</p>
-            <div class="chips">
-                <span class="chip">情绪按钮 · 贪嗔痴</span>
-                <span class="chip">对立制造 · 敌化隔离</span>
-                <span class="chip">恶意归因 · 锁定罪人</span>
-                <span class="chip">留白漏斗 · 扣住答案</span>
-                <span class="chip">审核规避 · 概念替换</span>
-            </div>
-            <p style="margin-top:16px;margin-bottom:0;color:#f8fafc;">手法一旦被完整写出并公开，就再也藏不住。<span class="key">认得出来，就不再是猎物。</span></p>
-        </div>
+        <div class="seal"><span>恶</span><span>盗</span><span>临</span><span>天</span></div>
 
-        <a class="entry" href="象限文案生成器 .html">进入矩阵选题引擎 →</a>
+        <h1 class="title">恶盗临天</h1>
+        <div class="divider"></div>
+        <p class="intro">从叙事的角度，暴露恶、显现恶，<span class="red">让恶为人所知</span>。</p>
 
-        <div class="foot">纯前端 · 无构建 · 数据与逻辑完全开源</div>
+        <div class="crimes-title">恶 盗 五 术</div>
+        <div class="crimes-sub">所行手法，皆见于此</div>
+        <ul class="crimes">
+            <li>
+                <span class="num">壹</span>
+                <div>
+                    <span class="crime-name">情绪按钮<i>·</i>贪嗔痴</span>
+                    <span class="crime-desc">三引擎齐下，按下读者的欲望、愤怒与幻想</span>
+                </div>
+            </li>
+            <li>
+                <span class="num">贰</span>
+                <div>
+                    <span class="crime-name">对立制造<i>·</i>敌化隔离</span>
+                    <span class="crime-desc">把人从「人」的名单里除名，再谈恩怨</span>
+                </div>
+            </li>
+            <li>
+                <span class="num">叁</span>
+                <div>
+                    <span class="crime-name">恶意归因<i>·</i>锁定罪人</span>
+                    <span class="crime-desc">复杂因果，简化为一句「他有病」</span>
+                </div>
+            </li>
+            <li>
+                <span class="num">肆</span>
+                <div>
+                    <span class="crime-name">留白漏斗<i>·</i>扣住答案</span>
+                    <span class="crime-desc">答案就在眼前，偏要读者先付钱</span>
+                </div>
+            </li>
+            <li>
+                <span class="num">伍</span>
+                <div>
+                    <span class="crime-name">审核规避<i>·</i>概念替换</span>
+                    <span class="crime-desc">换一个词，越界内容便悄然过关</span>
+                </div>
+            </li>
+        </ul>
+
+        <p class="closing">手法一旦被完整写出并公开，就再也藏不住。<br><span class="strong">认得出来，就不再是猎物。</span></p>
+
+        <a class="cta" href="象限文案生成器 .html">进入矩阵选题引擎<span class="arrow">→</span></a>
+
+        <div class="foot"><b>纯前端</b> · <b>无构建</b> · 数据与逻辑完全开源</div>
     </div>
 </body>
 </html>
