@@ -65,13 +65,20 @@
             color: var(--gold);
             margin-bottom: 26px;
         }
+        .stanza {
+            font-size: 13.5px;
+            line-height: 2;
+            letter-spacing: 0.05em;
+            color: var(--ink-2);
+            margin-bottom: 22px;
+        }
         .lead {
-            font-size: clamp(34px, 5vw, 50px);
+            font-size: clamp(30px, 4.5vw, 44px);
             font-weight: 900;
-            letter-spacing: 0.06em;
-            line-height: 1.45;
+            letter-spacing: 0.08em;
+            line-height: 1.4;
             color: var(--ink);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .lead em { font-style: normal; color: var(--cinnabar-soft); }
         .lines { font-size: 15px; color: var(--ink-2); letter-spacing: 0.05em; }
@@ -105,16 +112,18 @@
         /* 右 · 竖排标题 */
         .right { display: flex; flex-direction: column; align-items: center; gap: 30px; }
         .vt {
-            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
-            font-weight: 400;
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            font-weight: 900;
             writing-mode: vertical-rl;
             font-size: clamp(84px, 14vw, 150px);
-            letter-spacing: 0.06em;
+            letter-spacing: 0.12em;
             color: var(--ink);
             line-height: 1;
             text-shadow: 0 6px 40px rgba(176, 141, 76, 0.18);
         }
         .colophon {
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            font-weight: 600;
             writing-mode: vertical-rl;
             font-size: 12.5px;
             letter-spacing: 0.5em;
@@ -148,11 +157,11 @@
             margin-bottom: 20px;
         }
         .sec-head h2 {
-            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
-            font-weight: 400;
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            font-weight: 900;
             font-size: clamp(30px, 4.5vw, 42px);
-            letter-spacing: 0.22em;
-            text-indent: 0.22em;
+            letter-spacing: 0.18em;
+            text-indent: 0.18em;
             color: var(--ink);
         }
         .sec-head p { margin-top: 12px; font-size: 14px; color: var(--muted); letter-spacing: 0.1em; }
@@ -176,8 +185,9 @@
             box-shadow: 0 12px 30px rgba(122, 92, 54, 0.10);
         }
         .trick .num {
-            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
-            font-size: 26px; color: var(--cinnabar);
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            font-weight: 900;
+            font-size: 24px; color: var(--cinnabar);
             line-height: 1;
             margin-bottom: 16px;
             display: block;
@@ -199,11 +209,11 @@
         /* ===== 结语 ===== */
         .closing { padding: 100px 24px 110px; text-align: center; }
         .closing .big {
-            font-family: 'Ma Shan Zheng', 'KaiTi', serif;
-            font-weight: 400;
+            font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+            font-weight: 900;
             font-size: clamp(28px, 5vw, 46px);
-            letter-spacing: 0.14em;
-            text-indent: 0.14em;
+            letter-spacing: 0.1em;
+            text-indent: 0.1em;
             color: var(--ink);
             margin-bottom: 40px;
         }
@@ -246,7 +256,14 @@
         <div class="hero-inner">
             <div class="left rise">
                 <p class="eyebrow">从叙事的角度 · 暴露恶 显现恶 让恶为人所知</p>
-                <h2 class="lead">叙事，定义你的<em>应得</em>。</h2>
+                <p class="stanza">
+                    叙事是个功能性很强的东西。<br>
+                    它能定义背景、身份、因果、风险，<br>
+                    定义价值、策略、公理。<br>
+                    甚至，定义你的感受、你的不甘、<br>
+                    你的委屈、你的愤怒。
+                </p>
+                <h2 class="lead">甚至，定义你的<em>应得</em>。</h2>
                 <div class="lines">
                     <p>当应得与不甘聚集，贪嗔与需求应运而生。</p>
                     <p class="second">战斗，你是别人的枪；储备，你是别人的收益。</p>
