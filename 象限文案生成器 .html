@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容兵工厂 · 矩阵选题引擎 v2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: #0f172a;
+            padding: 32px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        .app {
+            max-width: 1440px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+        }
+
+        /* ===== 左侧变量库 ===== */
+        .sidebar {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            height: fit-content;
+        }
+        .sidebar h3 {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;
+            margin: 16px 0 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .sidebar h3:first-child { margin-top: 0; }
+        .sidebar h3 i { font-size: 13px; }
+        .stage-pool, .tag-pool { display: flex; flex-wrap: wrap; gap: 5px; }
+        .stage-pill, .tag-pill {
+            background: white; border: 1px solid #e2e8f0; padding: 4px 11px;
+            border-radius: 30px; font-size: 11px; font-weight: 500; color: #334155;
+            cursor: pointer; transition: 0.2s; user-select: none;
+        }
+        .stage-pill:hover, .tag-pill:hover { border-color: #8b5cf6; background: #eef2ff; }
+        .stage-pill.active { background: #0f172a; color: white; border-color: #0f172a; }
+        .tag-pool .tag-pill.active { background: #8b5cf6; color: white; border-color: #8b5cf6; }
+        .tag-pool .tag-pill.var-a.active { background: #e11d48; color: white; border-color: #e11d48; }
+        .tag-pool .tag-pill.var-b.active { background: #f59e0b; color: white; border-color: #f59e0b; }
+        .tag-pool .tag-pill.var-c.active { background: #10b981; color: white; border-color: #10b981; }
+        .pool-label { font-size: 10px; font-weight: 600; padding: 1px 8px; border-radius: 20px; margin-left: 4px; }
+        .pool-label.a { background: #fecdd3; color: #e11d48; }
+        .pool-label.b { background: #fde68a; color: #b45309; }
+        .pool-label.c { background: #a7f3d0; color: #047857; }
+        .sidebar-divider { margin: 16px 0; border: 0; border-top: 1px solid #e2e8f0; }
+
+        /* 变量详情面板 */
+        .detail-panel {
+            display: none; margin-top: 8px; padding: 10px 12px;
+            background: white; border-radius: 10px; border: 1px solid #e2e8f0;
+            font-size: 12px; line-height: 1.6;
+        }
+        .detail-panel.visible { display: block; }
+        .detail-panel .dp-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+        .detail-panel .dp-desc { color: #64748b; font-size: 11px; margin-bottom: 6px; }
+        .detail-panel .dp-subs { display: flex; flex-wrap: wrap; gap: 4px; }
+        .detail-panel .dp-subs span {
+            background: #f1f5f9; padding: 2px 8px; border-radius: 20px;
+            font-size: 10px; color: #475569; border: 1px solid #e2e8f0;
+        }
+        .detail-panel .dp-subs span.dp-a { border-color: #fecdd3; background: #fff1f2; color: #e11d48; }
+        .detail-panel .dp-subs span.dp-b { border-color: #fde68a; background: #fffbeb; color: #b45309; }
+        .detail-panel .dp-subs span.dp-c { border-color: #a7f3d0; background: #ecfdf5; color: #047857; }
+
+        /* 人性引擎区（并入变量E） */
+        .dp-hr { border: 0; border-top: 1px dashed #e2e8f0; margin: 10px 0 8px; }
+        .dp-humanity-title { font-size: 11px; font-weight: 700; color: #7c3aed; margin-bottom: 6px; }
+        .humanity-block { margin-top: 4px; }
+        .humanity-block .tag-pool { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+        .humanity-block .tag-pill.var-d {
+            background: #f5f3ff; border: 1px solid #ddd6fe; padding: 3px 12px;
+            border-radius: 20px; font-size: 11px; font-weight: 600; color: #6d28d9;
+            cursor: pointer; transition: 0.2s; user-select: none;
+        }
+        .humanity-block .tag-pill.var-d:hover { border-color: #8b5cf6; background: #ede9fe; }
+        .humanity-block .tag-pill.var-d.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+        .humanity-block .dp-core { font-weight: 700; font-size: 11px; color: #6d28d9; margin: 2px 0; }
+        .humanity-block .dp-stages { font-size: 10px; color: #64748b; margin-bottom: 6px; }
+        .humanity-block .dp-subs-label { font-size: 10px; color: #94a3b8; margin: 6px 0 4px; }
+        .humanity-block .dp-subs .sub-pill {
+            display: inline-flex; padding: 2px 9px; border-radius: 20px; font-size: 10px;
+            background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer;
+            transition: 0.2s; user-select: none;
+        }
+        .humanity-block .dp-subs .sub-pill:hover { border-color: #8b5cf6; }
+        .humanity-block .dp-subs .sub-pill.active { background: #ede9fe; border-color: #8b5cf6; color: #6d28d9; font-weight: 600; }
+
+        /* 变量D：贪嗔痴（单选标签 + 展开详情 + 子选项多选，与A/B/C风格一致） */
+        .tag-pool .tag-pill.var-d.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+        .tag-pool .tag-pill.var-e.active { background: #0ea5e9; color: white; border-color: #0ea5e9; }
+        .tag-pool .tag-pill.var-g.active { background: #ec4899; color: white; border-color: #ec4899; }
+        .pool-label.d { background: #f3e8ff; color: #7c3aed; }
+        .pool-label.e { background: #e0f2fe; color: #0ea5e9; }
+        .pool-label.g { background: #fce7f3; color: #db2777; }
+
+        /* D详情面板：与A/B/C同容器，附加核心动作/适用阶段/可点击多选子项 */
+        .detail-panel .dp-core { font-weight: 600; font-size: 11px; color: #7c3aed; margin-bottom: 4px; }
+        .detail-panel .dp-stages { font-size: 10px; color: #8b5cf6; font-weight: 600; margin-bottom: 6px; }
+        /* D三级子项：可点击多选标签（与变量C的标签交互一致） */
+        .detail-panel .dp-subs-label {
+            font-size: 9px; text-transform: uppercase; color: #94a3b8;
+            font-weight: 600; margin: 6px 0 4px; letter-spacing: 0.3px;
+        }
+        .detail-panel .dp-subs .sub-pill {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 10px; background: #f1f5f9; border: 1px solid #e2e8f0;
+            color: #475569; cursor: pointer; user-select: none; transition: 0.2s;
+        }
+        .detail-panel .dp-subs .sub-pill:hover { border-color: #c4b5fd; background: #f5f3ff; }
+        .detail-panel .dp-subs .sub-pill.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+        /* E三级静态子项 */
+        .detail-panel .dp-subs span.dp-e { border-color: #bae6fd; background: #f0f9ff; color: #0284c7; }
+        /* G三级静态子项 */
+        .detail-panel .dp-subs span.dp-g { border-color: #fbcfe8; background: #fdf2f8; color: #db2777; }
+
+        .desire-summary {
+            font-size: 10px; color: #94a3b8; margin-top: 4px; padding: 3px 8px;
+            background: #f8fafc; border-radius: 6px; line-height: 1.5;
+        }
+        .desire-summary .d-sum-cat { font-weight: 700; }
+        .desire-summary .d-sum-cat.c0 { color: #dc2626; }
+        .desire-summary .d-sum-cat.c1 { color: #d97706; }
+        .desire-summary .d-sum-cat.c2 { color: #7c3aed; }
+
+        /* ===== 右侧主区 ===== */
+        .main { display: flex; flex-direction: column; gap: 24px; }
+
+        /* ===== 模块一：矩阵控制台 ===== */
+        .matrix-console {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            border-radius: 20px; padding: 20px 24px;
+            border: 1px solid #e2e8f0;
+        }
+        .matrix-console .formula-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+        }
+        .formula-slot {
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .formula-slot label {
+            font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;
+        }
+        .formula-slot select {
+            padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 12px; background: white; font-family: inherit; min-width: 110px;
+            cursor: pointer;
+        }
+        .formula-slot select.va { border-color: #e11d48; }
+        .formula-slot select.vb { border-color: #f59e0b; }
+        .formula-slot select.vc { border-color: #10b981; }
+        .formula-slot select.ve { border-color: #0ea5e9; }
+        .formula-slot select.vf { border-color: #94a3b8; }
+        .formula-slot select.vg { border-color: #ec4899; }
+        .formula-operator {
+            font-size: 22px; font-weight: 700; color: #8b5cf6;
+            padding: 0 4px; margin-top: 14px;
+        }
+        .formula-equals {
+            font-size: 22px; font-weight: 700; color: #0f172a;
+            padding: 0 4px; margin-top: 14px;
+        }
+        .formula-result {
+            font-size: 13px; font-weight: 600; color: #8b5cf6;
+            background: #eef2ff; padding: 6px 14px; border-radius: 30px;
+            margin-top: 14px; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .matrix-actions {
+            display: flex; align-items: center; gap: 12px; margin-top: 14px;
+            padding-top: 14px; border-top: 1px solid #e2e8f0;
+        }
+        .btn-generate {
+            background: #8b5cf6; color: white; border: none; padding: 10px 28px;
+            border-radius: 30px; font-weight: 600; font-size: 14px;
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-generate:hover { background: #7c3aed; transform: scale(1.02); }
+        .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-batch {
+            background: white; border: 1px solid #cbd5e1; padding: 8px 20px;
+            border-radius: 30px; font-size: 12px; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-batch:hover { border-color: #8b5cf6; background: #eef2ff; }
+        .matrix-hint {
+            font-size: 11px; color: #94a3b8; margin-left: auto;
+        }
+
+        /* ===== 模块二：矩阵网格（选题卡片） ===== */
+        .matrix-grid {
+            background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 20px;
+        }
+        .grid-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+        }
+        .grid-header h2 { font-size: 15px; font-weight: 700; }
+        .grid-header .badge {
+            background: #eef2ff; color: #8b5cf6; font-size: 11px; font-weight: 600;
+            padding: 2px 12px; border-radius: 30px;
+        }
+        .topic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .topic-card {
+            background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 14px 16px; cursor: pointer; transition: 0.25s;
+            position: relative; overflow: hidden;
+        }
+        .topic-card:hover {
+            border-color: #8b5cf6; box-shadow: 0 4px 16px rgba(139,92,246,0.12);
+            transform: translateY(-2px);
+        }
+        .topic-card.selected {
+            border-color: #8b5cf6; background: #eef2ff;
+            box-shadow: 0 0 0 2px #8b5cf6;
+        }
+        .topic-card .card-tags {
+            display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+        }
+        .topic-card .card-tags span {
+            font-size: 9px; font-weight: 600; padding: 1px 8px; border-radius: 20px;
+        }
+        .topic-card .card-tags .stage-tag { background: #e0e7ff; color: #4338ca; }
+        .topic-card .card-tags .a-tag { background: #fecdd3; color: #e11d48; }
+        .topic-card .card-tags .b-tag { background: #fde68a; color: #b45309; }
+        .topic-card .card-tags .c-tag { background: #d1fae5; color: #047857; }
+        .topic-card .card-tags .d-tag { background: #f3e8ff; color: #7c3aed; border: 1px solid #e9d5ff; }
+        .topic-card .card-tags .g-tag { background: #fce7f3; color: #db2777; border: 1px solid #fbcfe8; }
+        .topic-card .card-tags .e-tag { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+        .topic-card .card-title {
+            font-size: 13px; font-weight: 600; line-height: 1.5; color: #0f172a;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .topic-card .card-preview {
+            font-size: 11px; color: #64748b; margin-top: 6px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .topic-card .card-select-hint {
+            position: absolute; top: 8px; right: 8px;
+            font-size: 10px; color: #8b5cf6; font-weight: 600; opacity: 0; transition: 0.2s;
+        }
+        .topic-card:hover .card-select-hint { opacity: 1; }
+        .topic-card.selected .card-select-hint { opacity: 1; }
+        .grid-empty {
+            grid-column: 1 / -1; text-align: center; padding: 40px 20px;
+            color: #94a3b8; font-size: 13px;
+        }
+        .grid-empty i { font-size: 32px; display: block; margin-bottom: 12px; color: #cbd5e1; }
+
+        /* ===== 模块三：分步流水线 ===== */
+        .workflow {
+            background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px;
+        }
+        .workflow .selected-topic-bar {
+            background: #fefce8; border: 1px solid #fde68a; border-radius: 10px;
+            padding: 10px 16px; margin-bottom: 18px;
+            font-size: 13px; display: flex; align-items: center; gap: 10px;
+        }
+        .workflow .selected-topic-bar i { color: #f59e0b; }
+        .workflow .selected-topic-bar .topic-text { font-weight: 600; }
+        .steps {
+            display: flex; gap: 0; margin-bottom: 20px; position: relative;
+        }
+        .step-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            position: relative; cursor: pointer;
+        }
+        .step-circle {
+            width: 40px; height: 40px; border-radius: 40px; background: #e2e8f0;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; color: #94a3b8;
+            transition: 0.3s; border: 3px solid transparent; z-index: 2;
+        }
+        .step-item.active .step-circle { background: #8b5cf6; color: white; border-color: #c4b5fd; }
+        .step-item.done .step-circle { background: #22c55e; color: white; }
+        .step-label { font-size: 11px; font-weight: 600; margin-top: 6px; color: #94a3b8; }
+        .step-item.active .step-label { color: #0f172a; }
+        .step-line {
+            position: absolute; top: 20px; left: calc(-50% + 20px); right: calc(50% + 20px);
+            height: 3px; background: #e2e8f0; z-index: 1;
+        }
+        .step-item.done .step-line { background: #22c55e; }
+        .step-item:first-child .step-line { display: none; }
+
+        /* 工作流内容区（输出 + 配置） */
+        .workflow-body {
+            background: #fafbfc; border: 1px solid #f1f5f9; border-radius: 16px; padding: 20px;
+        }
+        .output-area {
+            font-size: 14px; line-height: 1.9; white-space: pre-wrap; min-height: 150px;
+        }
+        .output-area .placeholder { color: #94a3b8; }
+
+        /* 工作流配置栏（干货留白度） */
+        .workflow-config {
+            margin-top: 16px; padding-top: 14px; border-top: 1px dashed #e2e8f0;
+        }
+        .half-life {
+            display: flex; align-items: center; gap: 10px; font-size: 11px; margin-top: 10px; flex-wrap: wrap;
+        }
+        .lead-magnet-config {
+            display: flex; align-items: center; gap: 10px; font-size: 11px; flex-wrap: wrap;
+        }
+        .lead-magnet-config .lm-select {
+            padding: 4px 10px; border-radius: 20px; border: 1px solid #cbd5e1;
+            font-size: 11px; background: white; font-family: inherit; cursor: pointer;
+            color: #7c3aed; font-weight: 600;
+        }
+        .hl-options { display: flex; gap: 2px; }
+        .hl-opt {
+            display: inline-flex; align-items: center; gap: 2px; padding: 2px 8px;
+            font-size: 10px; cursor: pointer; border-radius: 20px;
+            background: #f1f5f9; border: 1px solid #e2e8f0; transition: 0.2s;
+        }
+        .hl-opt.active { background: #eef2ff; border-color: #8b5cf6; color: #4338ca; }
+        .hl-opt input[type="radio"] { accent-color: #8b5cf6; margin: 0; width: 10px; height: 10px; }
+        .hl-bar {
+            flex: 1; min-width: 60px; height: 6px; background: #e2e8f0; border-radius: 6px; overflow: hidden;
+            position: relative;
+        }
+        .hl-fill {
+            height: 100%; border-radius: 6px; background: linear-gradient(90deg, #8b5cf6, #f59e0b);
+            transition: width 0.5s;
+        }
+        .hl-label { font-size: 10px; color: #64748b; white-space: nowrap; }
+        .hl-meta { font-size: 10px; color: #94a3b8; }
+        .prompt-toggle {
+            background: none; border: 1px dashed #cbd5e1; padding: 6px 16px;
+            border-radius: 30px; font-size: 11px; color: #64748b; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .prompt-toggle:hover { border-color: #8b5cf6; color: #8b5cf6; background: #eef2ff; }
+        .prompt-toggle.active { border-color: #8b5cf6; background: #eef2ff; color: #8b5cf6; }
+        .prompt-panel {
+            display: none; margin-top: 8px; background: #1e293b; color: #e2e8f0;
+            border-radius: 12px; padding: 16px; font-size: 12px; line-height: 1.8;
+            font-family: 'Inter', monospace; white-space: pre-wrap; overflow-x: auto;
+            max-height: 300px; overflow-y: auto;
+        }
+        .prompt-panel.visible { display: block; }
+        .prompt-panel .prompt-label { color: #8b5cf6; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .prompt-panel .prompt-var { color: #f59e0b; }
+        .prompt-panel .prompt-str { color: #22c55e; }
+        .prompt-panel .prompt-copy {
+            float: right; background: #334155; color: #94a3b8; border: none;
+            padding: 2px 12px; border-radius: 20px; font-size: 10px; cursor: pointer;
+        }
+        .prompt-panel .prompt-copy:hover { background: #475569; color: white; }
+
+        /* Prompt 标签切换 */
+        .prompt-tabs { display: flex; gap: 0; margin-bottom: 8px; }
+        .prompt-tab {
+            padding: 4px 14px; font-size: 10px; font-weight: 600; cursor: pointer;
+            border: 1px solid #334155; background: transparent; color: #94a3b8;
+            transition: 0.2s;
+        }
+        .prompt-tab:first-child { border-radius: 6px 0 0 6px; }
+        .prompt-tab:last-child { border-radius: 0 6px 6px 0; }
+        .prompt-tab.active { background: #8b5cf6; border-color: #8b5cf6; color: white; }
+        .prompt-tab:hover:not(.active) { background: #334155; color: #e2e8f0; }
+        .prompt-body { display: none; }
+        .prompt-body.active { display: block; }
+
+        .action-bar {
+            display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;
+            border-top: 1px solid #f1f5f9; padding-top: 16px;
+        }
+        .btn-approve { background: #22c55e; color: white; border: none; padding: 8px 28px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+        .btn-retry { background: transparent; border: 1px solid #e2e8f0; padding: 8px 28px; border-radius: 30px; cursor: pointer; }
+        .risk-highlight { background: #fee2e2; color: #dc2626; border-radius: 4px; padding: 0 4px; border-bottom: 2px solid #ef4444; cursor: help; }
+        .suggestion-tip { background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; font-size: 12px; margin-top: 12px; }
+        .suggestion-tip span { background: #e0f2fe; padding: 2px 8px; border-radius: 20px; margin: 0 4px; cursor: pointer; }
+        .suggestion-tip span:hover { background: #7c3aed; color: white; }
+
+        /* ===== 四层架构全景图 ===== */
+        .architecture-panel {
+            border: 1px solid #e2e8f0; border-radius: 16px; background: #fafbfc; overflow: hidden;
+        }
+        .arch-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px; cursor: pointer; user-select: none;
+            background: #f1f5f9; transition: 0.2s;
+        }
+        .arch-header:hover { background: #eef2ff; }
+        .arch-header h3 { font-size: 12px; font-weight: 700; color: #334155; margin: 0; }
+        .arch-header .arch-toggle { font-size: 10px; color: #94a3b8; }
+        .arch-body { display: none; padding: 16px 18px; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .arch-body.visible { display: grid; }
+        @media (max-width: 900px) { .arch-body.visible { grid-template-columns: 1fr 1fr; } }
+        .arch-layer {
+            background: white; border-radius: 12px; padding: 14px; border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .arch-layer .layer-num {
+            font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .arch-layer .layer-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .arch-layer .layer-desc { font-size: 10px; color: #64748b; line-height: 1.5; }
+        .arch-layer .layer-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+        .arch-layer .layer-tags span {
+            font-size: 9px; padding: 1px 8px; border-radius: 20px; background: #f1f5f9; color: #475569;
+        }
+        .arch-layer.l1 { border-left: 3px solid #8b5cf6; }
+        .arch-layer.l2 { border-left: 3px solid #f59e0b; }
+        .arch-layer.l3 { border-left: 3px solid #ef4444; }
+        .arch-layer.l4 { border-left: 3px solid #10b981; }
+        .arch-layer.l1 .layer-num { color: #8b5cf6; }
+        .arch-layer.l2 .layer-num { color: #f59e0b; }
+        .arch-layer.l3 .layer-num { color: #ef4444; }
+        .arch-layer.l4 .layer-num { color: #10b981; }
+        .arch-arrow {
+            display: none; position: absolute; right: -16px; top: 50%; transform: translateY(-50%);
+            color: #cbd5e1; font-size: 16px;
+        }
+        .arch-layer:not(:last-child) .arch-arrow { display: block; }
+
+        /* ===== 风控词典 ===== */
+        .risk-dict { margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 14px; }
+        .risk-dict h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .risk-dict h3 i { font-size: 13px; }
+        .risk-map { display: flex; flex-direction: column; gap: 4px; }
+        .risk-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+        .risk-row .arrow { color: #94a3b8; font-size: 12px; }
+        .risk-row .bad-word { background: #f1f5f9; padding: 2px 8px; border-radius: 20px; color: #dc2626; }
+        .risk-row .good-word { background: #ecfdf5; padding: 2px 8px; border-radius: 20px; color: #047857; font-weight: 600; }
+        .risk-toggles { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .risk-toggles label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; cursor: pointer; }
+        .risk-toggles input[type="checkbox"] { accent-color: #8b5cf6; }
+
+        .half-life {
+            margin-top: 8px; padding: 8px 14px; background: #f1f5f9; border-radius: 8px;
+            display: none; align-items: center; gap: 10px; font-size: 11px;
+        }
+        .half-life.visible { display: flex; }
+        .half-life .hl-bar {
+            flex: 1; height: 6px; background: #e2e8f0; border-radius: 6px; overflow: hidden;
+            position: relative;
+        }
+        .half-life .hl-fill {
+            height: 100%; border-radius: 6px; background: linear-gradient(90deg, #8b5cf6, #f59e0b);
+            transition: width 0.5s;
+        }
+        .half-life .hl-label { font-size: 10px; color: #64748b; white-space: nowrap; }
+        .half-life .hl-markers { display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; margin-top: 2px; }
+
+        /* ===== 模块四：数据看板 ===== */
+        .dashboard {
+            background: #f1f5f9; border-radius: 16px; padding: 16px 24px;
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+            font-size: 13px;
+        }
+        .stat { display: flex; align-items: center; gap: 8px; }
+        .stat strong { font-size: 18px; color: #0f172a; }
+        .stat .rank-badge {
+            padding: 2px 12px; border-radius: 30px; font-weight: 600; font-size: 12px;
+        }
+        .stat .rank-badge.gold { background: #8b5cf6; color: white; }
+        .stat .rank-badge.silver { background: #e2e8f0; color: #334155; }
+
+        /* ===== 工业化生产图纸：产品化开发看板 ===== */
+        .product-pipeline {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px;
+            margin-top: 8px;
+        }
+        .pipeline-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+        }
+        .pipeline-header h3 { font-size: 12px; font-weight: 700; color: #334155; margin: 0; }
+        .pipeline-header .pipeline-badge {
+            font-size: 9px; padding: 2px 10px; border-radius: 20px;
+            background: #8b5cf6; color: white; font-weight: 600;
+        }
+        .pipeline-flow {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-items: stretch;
+        }
+        @media (max-width: 900px) { .pipeline-flow { grid-template-columns: 1fr; } }
+        .pipe-step {
+            background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0;
+            text-align: center; position: relative;
+        }
+        .pipe-step .pipe-icon { font-size: 18px; margin-bottom: 4px; }
+        .pipe-step .pipe-title { font-size: 10px; font-weight: 700; color: #0f172a; }
+        .pipe-step .pipe-desc { font-size: 9px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+        .pipe-step .pipe-arrow {
+            position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+            color: #cbd5e1; font-size: 12px;
+        }
+        .pipe-step:last-child .pipe-arrow { display: none; }
+        .pipe-step.ps1 { border-top: 3px solid #8b5cf6; }
+        .pipe-step.ps2 { border-top: 3px solid #f59e0b; }
+        .pipe-step.ps3 { border-top: 3px solid #ef4444; }
+        .pipe-step.ps4 { border-top: 3px solid #10b981; }
+        .pipe-step.ps5 { border-top: 3px solid #0ea5e9; }
+        .pipe-step .pipe-tag {
+            display: inline-block; font-size: 8px; padding: 1px 6px; border-radius: 10px;
+            background: #f1f5f9; color: #475569; margin-top: 4px;
+        }
+
+        /* 产品护城河指标 */
+        .moat-bar {
+            margin-top: 12px; display: flex; align-items: center; gap: 16px;
+            padding: 10px 14px; background: #fefce8; border: 1px solid #fde68a; border-radius: 10px;
+            font-size: 11px; flex-wrap: wrap;
+        }
+        .moat-bar .moat-item {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .moat-bar .moat-item .moat-check { color: #22c55e; font-size: 12px; }
+
+        /* ===== 风控扫描仪 ===== */
+        .scanner-panel {
+            margin-top: 12px; background: #fafbfc; border: 1px solid #e2e8f0;
+            border-radius: 12px; padding: 14px; display: none;
+        }
+        .scanner-panel.visible { display: block; }
+        .scanner-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .scanner-header h4 { font-size: 12px; font-weight: 700; margin: 0; }
+        .scanner-header .scanner-badge {
+            font-size: 9px; padding: 1px 8px; border-radius: 20px; font-weight: 600;
+        }
+        .scanner-header .scanner-badge.pass { background: #dcfce7; color: #15803d; }
+        .scanner-header .scanner-badge.fail { background: #fee2e2; color: #dc2626; }
+        .scanner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        @media (max-width: 700px) { .scanner-grid { grid-template-columns: 1fr; } }
+        .scanner-item {
+            display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 6px 10px;
+            border-radius: 8px; background: white; border: 1px solid #e2e8f0;
+        }
+        .scanner-item .si-icon { font-size: 14px; }
+        .scanner-item .si-icon.pass { color: #22c55e; }
+        .scanner-item .si-icon.fail { color: #ef4444; }
+        .scanner-item .si-label { font-weight: 600; }
+        .scanner-item .si-detail { color: #64748b; font-size: 10px; margin-left: auto; }
+        .scanner-item .si-replace {
+            margin-left: auto; font-size: 9px; padding: 1px 8px; border-radius: 20px;
+            background: #eef2ff; color: #8b5cf6; cursor: pointer; border: none; font-weight: 600;
+        }
+        .scanner-item .si-replace:hover { background: #8b5cf6; color: white; }
+
+        /* ===== 历史配方管理 ===== */
+        .history-panel {
+            background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px;
+            margin-top: 8px;
+        }
+        .history-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+        .history-header h3 { font-size: 12px; font-weight: 700; color: #334155; margin: 0; }
+        .history-header .clear-btn {
+            font-size: 10px; padding: 2px 12px; border-radius: 20px;
+            background: #f1f5f9; border: 1px solid #e2e8f0; cursor: pointer; color: #64748b;
+        }
+        .history-header .clear-btn:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .history-table {
+            width: 100%; border-collapse: collapse; font-size: 11px;
+        }
+        .history-table th {
+            text-align: left; padding: 6px 8px; color: #64748b; font-weight: 600;
+            border-bottom: 1px solid #e2e8f0; font-size: 10px; text-transform: uppercase;
+        }
+        .history-table td {
+            padding: 6px 8px; border-bottom: 1px solid #f1f5f9; color: #334155;
+        }
+        .history-table tr:hover td { background: #f8fafc; }
+        .history-table .h-empty {
+            text-align: center; padding: 24px; color: #94a3b8; font-size: 12px;
+        }
+        .history-table .h-tag {
+            font-size: 9px; padding: 1px 6px; border-radius: 10px; font-weight: 600;
+        }
+        .history-table .h-tag.stage-tag { background: #e0e7ff; color: #4338ca; }
+        .history-table .h-tag.a-tag { background: #fecdd3; color: #e11d48; }
+        .history-table .h-tag.b-tag { background: #fde68a; color: #b45309; }
+        .history-table .h-tag.c-tag { background: #a7f3d0; color: #047857; }
+
+        /* ===== 动画 ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .topic-card {
+            animation: fadeInUp 0.35s ease both;
+        }
+        .topic-card:nth-child(1) { animation-delay: 0.02s; }
+        .topic-card:nth-child(2) { animation-delay: 0.06s; }
+        .topic-card:nth-child(3) { animation-delay: 0.10s; }
+        .topic-card:nth-child(4) { animation-delay: 0.14s; }
+        .topic-card:nth-child(5) { animation-delay: 0.18s; }
+        .topic-card:nth-child(6) { animation-delay: 0.22s; }
+        .topic-card:nth-child(7) { animation-delay: 0.26s; }
+        .topic-card:nth-child(8) { animation-delay: 0.30s; }
+
+        @media (max-width: 1000px) { .app { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) {
+            .matrix-console .formula-bar { flex-direction: column; align-items: stretch; }
+            .formula-operator, .formula-equals { display: none; }
+            .topic-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- ===== 左侧：变量库 ===== -->
+    <div class="sidebar">
+        <h3><i class="fas fa-layer-group"></i> 纵轴·用户旅程</h3>
+        <div class="stage-pool" id="stagePool">
+            <span class="stage-pill active" data-stage="0">迷茫期</span>
+            <span class="stage-pill" data-stage="1">觉醒期</span>
+            <span class="stage-pill" data-stage="2">反制期</span>
+            <span class="stage-pill" data-stage="3">抽离期</span>
+        </div>
+
+        <hr class="sidebar-divider">
+
+        <h3><i class="fas fa-skull"></i> 变量A·行为定性 <span class="pool-label a">A</span></h3>
+        <div class="tag-pool" id="behaviorPool"></div>
+        <div class="detail-panel" id="detailA"><div class="dp-label"></div><div class="dp-desc"></div><div class="dp-subs"></div></div>
+
+        <h3><i class="fas fa-heart-crack"></i> 变量B·痛点感受 <span class="pool-label b">B</span></h3>
+        <div class="tag-pool" id="painPool"></div>
+        <div class="detail-panel" id="detailB"><div class="dp-label"></div><div class="dp-desc"></div><div class="dp-subs"></div></div>
+
+        <h3><i class="fas fa-shield-halved"></i> 变量C·反制策略 <span class="pool-label c">C</span></h3>
+        <div class="tag-pool" id="strategyPool"></div>
+        <div class="detail-panel" id="detailC"><div class="dp-label"></div><div class="dp-desc"></div><div class="dp-subs"></div></div>
+
+        <h3><i class="fas fa-wand-magic-sparkles"></i> 变量E·情绪SKU <span class="pool-label e">E</span><span style="font-size:9px;color:#94a3b8;margin-left:4px;">含人性贪嗔</span></h3>
+        <div class="tag-pool" id="emotionPool">
+            <span class="tag-pill var-e active" data-e-idx="0" title="祛魅免责，缓解焦虑">止痛药</span>
+            <span class="tag-pill var-e" data-e-idx="1" title="复仇爽感，提供多巴胺">兴奋剂</span>
+            <span class="tag-pill var-e" data-e-idx="2" title="切断内耗，给予安全感">镇定剂</span>
+        </div>
+        <div class="detail-panel" id="detailE">
+            <div class="dp-label"></div><div class="dp-desc"></div><div class="dp-subs"></div>
+            <div class="dp-hr"></div>
+            <div class="humanity-block" id="humanityBlock">
+                <div class="dp-humanity-title">🔍 人性引擎（贪嗔痴）· 点击选择燃料</div>
+                <div class="tag-pool" id="desireCatPool">
+                    <span class="tag-pill var-d" data-cat-idx="0" title="对补偿与高位的贪婪">贪</span>
+                    <span class="tag-pill var-d" data-cat-idx="1" title="对报复与摧毁的渴望">嗔</span>
+                    <span class="tag-pill var-d" data-cat-idx="2" title="对虚幻与执念的沉溺">痴</span>
+                </div>
+                <div class="dp-label"></div>
+                <div class="dp-core"></div>
+                <div class="dp-desc"></div>
+                <div class="dp-stages"></div>
+                <div class="dp-subs-label">📌 人性子选项 · 点击多选</div>
+                <div class="dp-subs" id="ddSubs"></div>
+                <div class="desire-summary" id="desireSummary">👆 选择人性引擎，细化驱动方向</div>
+            </div>
+        </div>
+
+        <h3><i class="fas fa-layer-group"></i> 变量G·内容类型 <span class="pool-label g">G</span><span style="font-size:9px;color:#94a3b8;margin-left:4px;">单选结构</span></h3>
+        <div class="tag-pool" id="contentTypePool">
+            <span class="tag-pill var-g active" data-g-idx="0" title="特征清单，帮用户对照打勾">锚定诊断卡</span>
+            <span class="tag-pill var-g" data-g-idx="1" title="心理机制，帮用户免责">病理祛魅镜</span>
+            <span class="tag-pill var-g" data-g-idx="2" title="微操拆解，帮用户看透">行为手术刀</span>
+            <span class="tag-pill var-g" data-g-idx="3" title="揭穿谎言，打掉幻想">假象粉碎机</span>
+            <span class="tag-pill var-g" data-g-idx="4" title="免除自责，安抚羞耻">自我合理化器</span>
+            <span class="tag-pill var-g" data-g-idx="5" title="预判作妖，提供掌控">预警雷达</span>
+            <span class="tag-pill var-g" data-g-idx="6" title="升维视角，颠覆认知">认知重构器</span>
+            <span class="tag-pill var-g" data-g-idx="7" title="实操策略，复仇爽感">反制兵法书</span>
+            <span class="tag-pill var-g" data-g-idx="8" title="重建自我，抽离指引">疗愈重生录</span>
+            <span class="tag-pill var-g" data-g-idx="9" title="名人案例，代入印证">案例解剖台</span>
+        </div>
+        <div class="detail-panel" id="detailG">
+            <div class="dp-label"></div><div class="dp-desc"></div><div class="dp-subs"></div>
+        </div>
+
+        <hr class="sidebar-divider">
+
+        <!-- 风控词典 -->
+        <div class="risk-dict">
+            <h3><i class="fas fa-shield-halved"></i> 风控词典 <span style="font-size:9px;color:#94a3b8;font-weight:400;">含敌化映射</span></h3>
+            <div class="risk-map">
+                <div class="risk-row"><span class="bad-word">不理他</span><span class="arrow">→</span><span class="good-word">情绪断供</span></div>
+                <div class="risk-row"><span class="bad-word">报复</span><span class="arrow">→</span><span class="good-word">高价值抽离</span></div>
+                <div class="risk-row"><span class="bad-word">冷暴力</span><span class="arrow">→</span><span class="good-word">能量切割</span></div>
+                <div class="risk-row"><span class="bad-word">骂他</span><span class="arrow">→</span><span class="good-word">反向PUA</span></div>
+                <div class="risk-row"><span class="bad-word">揭穿他</span><span class="arrow">→</span><span class="good-word">捧杀种心锚</span></div>
+                <div class="risk-row"><span class="bad-word">饿鬼/吸血鬼</span><span class="arrow">→</span><span class="good-word">情感黑洞/能量榨取者</span></div>
+                <div class="risk-row"><span class="bad-word">寄生虫/怪物</span><span class="arrow">→</span><span class="good-word">寄生型人格/极端操控者</span></div>
+                <div class="risk-row"><span class="bad-word">行尸走肉/恶魔</span><span class="arrow">→</span><span class="good-word">情感剥夺机器/自恋性暴怒</span></div>
+                <div class="risk-row"><span class="bad-word">精神谋杀/杀人陷阱</span><span class="arrow">→</span><span class="good-word">认知摧毁机制/精神绞杀</span></div>
+                <div class="risk-row"><span class="bad-word">基因带的/狂犬病</span><span class="arrow">→</span><span class="good-word">器质性丧失/病态失控者</span></div>
+                <div class="risk-row"><span class="bad-word">让他去死/屏蔽所有人</span><span class="arrow">→</span><span class="good-word">让他尝尝代价/切断毒性联结</span></div>
+            </div>
+            <div class="risk-toggles">
+                <label><input type="checkbox" id="toggleDisclaimer" checked> 自动添加免责门槛（"心软的人别用"）</label>
+                <label><input type="checkbox" id="toggleAbstract" checked> 靶标抽象化（统称NPD，不针对个人）</label>
+                <label><input type="checkbox" id="toggleTheory" checked> 嵌入心理学理论包装（间歇性强化等）</label>
+            </div>
+        </div>
+
+        <hr class="sidebar-divider">
+        <div style="text-align:center;">
+            <button class="btn-batch" style="width:100%;justify-content:center;" onclick="resetAllSelections()">
+                <i class="fas fa-rotate-left"></i> 重置所有选中
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== 右侧主区 ===== -->
+    <div class="main">
+        <!-- ===== 模块一：矩阵控制台 ===== -->
+        <div class="matrix-console" id="matrixConsole">
+            <div class="formula-bar">
+                <div class="formula-slot">
+                    <label>📍 纵轴·阶段</label>
+                    <select id="matrixStage">
+                        <option value="0">迷茫期</option>
+                        <option value="1">觉醒期</option>
+                        <option value="2" selected>反制期</option>
+                        <option value="3">抽离期</option>
+                    </select>
+                </div>
+                <span class="formula-operator">×</span>
+
+                <div class="formula-slot">
+                    <label style="color:#e11d48;">🔴 变量A·行为定性</label>
+                    <select id="matrixBehavior" class="va"></select>
+                </div>
+                <span class="formula-operator">×</span>
+
+                <div class="formula-slot">
+                    <label style="color:#f59e0b;">🟡 变量B·痛点感受</label>
+                    <select id="matrixPain" class="vb"></select>
+                </div>
+                <span class="formula-operator">×</span>
+
+                <div class="formula-slot">
+                    <label style="color:#10b981;">🟢 变量C·反制策略</label>
+                    <select id="matrixStrategy" class="vc"></select>
+                </div>
+                <span class="formula-operator">×</span>
+
+                <div class="formula-slot">
+                    <label style="color:#ec4899;">🎯 变量G·内容类型</label>
+                    <select id="matrixContentType" class="vg"></select>
+                </div>
+                <span class="formula-operator">×</span>
+
+                <div class="formula-slot">
+                    <label style="color:#0ea5e9;">💊 变量E·情绪SKU <span style="text-transform:none;font-weight:400;color:#94a3b8;">含人性贪嗔</span></label>
+                    <select id="matrixEmotion" class="ve">
+                        <option value="0">止痛药（祛魅免责）</option>
+                        <option value="1">兴奋剂（复仇爽感）</option>
+                        <option value="2">镇定剂（切断内耗）</option>
+                    </select>
+                </div>
+                <span class="formula-equals">=</span>
+                <div class="formula-result" id="formulaPreview">选题骨架</div>
+            </div>
+
+            <div class="matrix-actions">
+                <button class="btn-generate" id="generateMatrixBtn">
+                    <i class="fas fa-calculator"></i> 执行矩阵运算
+                </button>
+                <button class="btn-batch" id="batchGenerateBtn">
+                    <i class="fas fa-dice-d6"></i> 批量生成
+                </button>
+                <span class="matrix-hint"><i class="fas fa-lightbulb"></i> 点击左侧标签可增减变量</span>
+            </div>
+        </div>
+
+        <!-- ===== 模块二：矩阵网格 ===== -->
+        <div class="matrix-grid" id="matrixGrid">
+            <div class="grid-header">
+                <h2><i class="fas fa-th"></i> 矩阵选题库</h2>
+                <span class="badge" id="topicCount">0 个选题</span>
+            </div>
+            <div class="topic-grid" id="topicGrid">
+                <div class="grid-empty">
+                    <i class="fas fa-cube"></i>
+                    点击「执行矩阵运算」生成选题配方<br>
+                    <span style="font-size:11px;color:#cbd5e1;">公式：[纵轴] × [行为定性] × [痛点感受] × [反制策略] × [内容类型] × [情绪SKU(含人性贪嗔)]</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 四层架构全景图 ===== -->
+        <div class="architecture-panel" id="archPanel">
+            <div class="arch-header" id="archToggle">
+                <h3><i class="fas fa-layer-group"></i> 四层架构 · 内容产品化全景图</h3>
+                <span class="arch-toggle" id="archToggleIcon">▲ 收起</span>
+            </div>
+            <div class="arch-body visible" id="archBody">
+                <div class="arch-layer l1">
+                    <div class="layer-num">LAYER 1</div>
+                    <div class="layer-title">🏭 生产引擎</div>
+                    <div class="layer-desc">纵轴×横轴矩阵乘法，源源不断生成不重样的选题骨架</div>
+                    <div class="layer-tags">
+                        <span>纵轴·用户旅程</span><span>横轴·变量库</span><span>矩阵乘法</span>
+                    </div>
+                    <span class="arch-arrow">→</span>
+                </div>
+                <div class="arch-layer l2">
+                    <div class="layer-num">LAYER 2</div>
+                    <div class="layer-title">💊 产品交付</div>
+                    <div class="layer-desc">把内容做成情绪SKU，尾部挂钩诱饵产品导入私域</div>
+                    <div class="layer-tags">
+                        <span>情绪SKU</span><span>止痛药·兴奋剂·镇定剂</span><span>诱饵产品</span>
+                    </div>
+                    <span class="arch-arrow">→</span>
+                </div>
+                <div class="arch-layer l3">
+                    <div class="layer-num">LAYER 3</div>
+                    <div class="layer-title">🛡️ 风控与包装</div>
+                    <div class="layer-desc">理论包装+概念替换+免责门槛，构筑合规护城河</div>
+                    <div class="layer-tags">
+                        <span>理论包装</span><span>概念替换</span><span>免责门槛</span>
+                    </div>
+                    <span class="arch-arrow">→</span>
+                </div>
+                <div class="arch-layer l4">
+                    <div class="layer-num">LAYER 4</div>
+                    <div class="layer-title">💰 闭环引流</div>
+                    <div class="layer-desc">干货留白度+制造无能感+私域承接，完成变现漏斗</div>
+                    <div class="layer-tags">
+                        <span>干货留白度</span><span>制造无能感</span><span>私域变现</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 模块三：分步加工流水线 ===== -->
+        <div class="workflow" id="workflow">
+            <!-- 当前选题条 -->
+            <div class="selected-topic-bar" id="selectedTopicBar" style="display:none;">
+                <i class="fas fa-bullseye"></i>
+                当前选题：<span class="topic-text" id="selectedTopicText">—</span>
+                <span style="margin-left:auto;font-size:11px;color:#94a3b8;">点击上方选题卡片切换</span>
+            </div>
+
+            <!-- 步骤条 -->
+            <div class="steps" id="stepContainer">
+                <div class="step-item active" data-step="1">
+                    <div class="step-line"></div>
+                    <div class="step-circle">1</div>
+                    <div class="step-label">痛点引入</div>
+                </div>
+                <div class="step-item" data-step="2">
+                    <div class="step-line"></div>
+                    <div class="step-circle">🔒2</div>
+                    <div class="step-label">敌化隔离</div>
+                </div>
+                <div class="step-item" data-step="3">
+                    <div class="step-line"></div>
+                    <div class="step-circle">3</div>
+                    <div class="step-label">赋能反制</div>
+                </div>
+                <div class="step-item" data-step="4">
+                    <div class="step-line"></div>
+                    <div class="step-circle">4</div>
+                    <div class="step-label">干货留白</div>
+                </div>
+                <div class="step-item" data-step="5">
+                    <div class="step-line"></div>
+                    <div class="step-circle">5</div>
+                    <div class="step-label">闭环引流</div>
+                </div>
+            </div>
+
+            <!-- 工作流内容体 -->
+            <div class="workflow-body">
+                <!-- 输出区 -->
+                <div class="output-area" id="outputArea">
+                    <span class="placeholder">👆 先在矩阵中生成并选择一个选题，再启动流水线...</span>
+                </div>
+
+                <!-- 配置栏 -->
+                <div class="workflow-config">
+                    <div class="lead-magnet-config">
+                        <span style="font-weight:600;font-size:10px;min-width:60px;">🎣 闭环诱饵</span>
+                        <select id="matrixLeadMagnet" class="lm-select">
+                            <option value="0">《反制全攻略》</option>
+                            <option value="1">《NPD测评表》</option>
+                            <option value="2">《反制话术21条》</option>
+                            <option value="3">《7天蜕变计划》</option>
+                        </select>
+                        <span style="font-size:10px;color:#94a3b8;">固定挂载件 · 不参与选题，仅第5步闭环拼接</span>
+                    </div>
+                    <div class="half-life" id="halfLife">
+                        <span style="font-weight:600;font-size:10px;min-width:60px;">📦 干货留白度</span>
+                        <div class="hl-options" id="hlOptions">
+                            <label class="hl-opt" data-val="0">
+                                <input type="radio" name="hlMode" value="0"> <span>0% 全盘托出</span>
+                            </label>
+                            <label class="hl-opt active" data-val="50">
+                                <input type="radio" name="hlMode" value="50" checked> <span>50% 只给概念</span>
+                            </label>
+                            <label class="hl-opt" data-val="80">
+                                <input type="radio" name="hlMode" value="80"> <span>80% 只讲现象</span>
+                            </label>
+                        </div>
+                        <div class="hl-bar">
+                            <div class="hl-fill" id="hlFill" style="width:50%"></div>
+                        </div>
+                        <span class="hl-label" id="hlLabel">已给干货 50%</span>
+                        <span class="hl-meta" id="hlMeta">留悬念 50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt 指令区 -->
+            <div class="prompt-area">
+                <button class="prompt-toggle" id="promptToggle">
+                    <i class="fa-regular fa-file-lines"></i> 显示AI指令
+                </button>
+                <div class="prompt-panel" id="promptPanel">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <button class="prompt-copy" onclick="copyPrompt()">📋 复制</button>
+                        <div class="prompt-tabs">
+                            <span class="prompt-tab active" data-tab="step">当前步骤</span>
+                            <span class="prompt-tab" data-tab="full">完整系统提示</span>
+                        </div>
+                    </div>
+                    <div class="prompt-body active" id="promptBodyStep">
+                        <div class="prompt-label">📋 PROMPT · <span id="promptStepLabel">第1步 痛点引入</span></div>
+                        <div id="promptContent">请先选择一个选题</div>
+                    </div>
+                    <div class="prompt-body" id="promptBodyFull">
+                        <div class="prompt-label">⚡ 完整系统提示词</div>
+                        <div id="promptFullContent">请先选择一个选题</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 风控建议 -->
+            <div id="riskSuggestion" class="suggestion-tip" style="display:none;">
+                ⚠️ 检测到潜在风险词：<span id="riskWord">报复</span>
+                → 建议替换为：<span onclick="replaceRisk('拿回主动权')">拿回主动权</span>
+                <span onclick="replaceRisk('高价值反击')">高价值反击</span>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-bar">
+                <button class="btn-retry" id="retryBtn"><i class="fas fa-rotate"></i> 重写此步</button>
+                <button class="btn-approve" id="nextStepBtn"><i class="fas fa-check"></i> 通过，进入下一步</button>
+            </div>
+
+            <!-- 风控扫描仪 -->
+            <div class="scanner-panel" id="scannerPanel">
+                <div class="scanner-header">
+                    <h4><i class="fas fa-shield-halved"></i> 风控扫描仪</h4>
+                    <span class="scanner-badge" id="scannerBadge">检测中</span>
+                    <span style="margin-left:auto;font-size:10px;color:#94a3b8;">自动扫描文案风险</span>
+                </div>
+                <div class="scanner-grid" id="scannerGrid">
+                    <div class="scanner-item"><span class="si-icon" id="scCheck1">⏳</span><span class="si-label">风险词检测</span><span class="si-detail" id="scDetail1">扫描中...</span></div>
+                    <div class="scanner-item"><span class="si-icon" id="scCheck2">⏳</span><span class="si-label">免责门槛</span><span class="si-detail" id="scDetail2">扫描中...</span></div>
+                    <div class="scanner-item"><span class="si-icon" id="scCheck3">⏳</span><span class="si-label">靶标抽象化</span><span class="si-detail" id="scDetail3">扫描中...</span></div>
+                    <div class="scanner-item"><span class="si-icon" id="scCheck4">⏳</span><span class="si-label">概念替换率</span><span class="si-detail" id="scDetail4">扫描中...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 模块四：工业化生产图纸 ===== -->
+        <div class="product-pipeline">
+            <div class="pipeline-header">
+                <h3><i class="fas fa-industry"></i> 工业化生产图纸 · 产品化开发流水线</h3>
+                <span class="pipeline-badge">已启动</span>
+            </div>
+            <div class="pipeline-flow">
+                <div class="pipe-step ps1">
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-icon">📊</div>
+                    <div class="pipe-title">矩阵选题</div>
+                    <div class="pipe-desc">纵轴×横轴乘法组合生成选题骨架</div>
+                    <span class="pipe-tag">产能引擎</span>
+                </div>
+                <div class="pipe-step ps2">
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-icon">💊</div>
+                    <div class="pipe-title">情绪SKU加工</div>
+                    <div class="pipe-desc">止痛药·兴奋剂·镇定剂 情绪配比</div>
+                    <span class="pipe-tag">产品交付</span>
+                </div>
+                <div class="pipe-step ps3">
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-icon">🛡️</div>
+                    <div class="pipe-title">风控包装</div>
+                    <div class="pipe-desc">概念替换+理论包装+免责门槛</div>
+                    <span class="pipe-tag">护城河</span>
+                </div>
+                <div class="pipe-step ps4">
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-icon">🧲</div>
+                    <div class="pipe-title">诱饵引流</div>
+                    <div class="pipe-desc">前端抛痛点，诱饵拿线索</div>
+                    <span class="pipe-tag">私域入囗</span>
+                </div>
+                <div class="pipe-step ps5">
+                    <div class="pipe-icon">💰</div>
+                    <div class="pipe-title">变现闭环</div>
+                    <div class="pipe-desc">社群/1v1咨询，高客单价交付</div>
+                    <span class="pipe-tag">收益</span>
+                </div>
+            </div>
+
+            <!-- 产品护城河 -->
+            <div class="moat-bar">
+                <span style="font-weight:700;font-size:10px;">🛡️ 产品护城河</span>
+                <div class="moat-item"><span class="moat-check">✓</span> 概念替换（冷暴力→情绪断供）</div>
+                <div class="moat-item"><span class="moat-check">✓</span> 反向筛选（"心软的人别用"）</div>
+                <div class="moat-item"><span class="moat-check">✓</span> 干货留白度（只给概念不给实操）</div>
+                <div class="moat-item"><span class="moat-check">✓</span> 靶标抽象化（统称NPD）</div>
+                <div class="moat-item" style="margin-left:auto;">
+                    <span class="badge" id="generatedCount">0</span>
+                    <span style="color:#64748b;font-size:10px;">已生成选题</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 历史配方管理 ===== -->
+        <div class="history-panel" id="historyPanel">
+            <div class="history-header">
+                <h3><i class="fas fa-clock-rotate"></i> 历史配方记录</h3>
+                <button class="clear-btn" onclick="clearHistory()">清空记录</button>
+            </div>
+            <table class="history-table">
+                <thead><tr>
+                    <th>时间</th><th>阶段</th><th>行为</th><th>痛点</th><th>策略</th><th>情绪配比</th>
+                </tr></thead>
+                <tbody id="historyBody">
+                    <tr><td colspan="6" class="h-empty">暂无记录，生成选题后自动记录</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 逻辑与数据已拆分：data.js（语料/变量）+ app.js（引擎/流水线） -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
